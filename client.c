@@ -5,13 +5,15 @@
 #include <netdb.h> 
 #include <string.h>
 
+#define Server_Hostname "jiahewu-VMware-Virtual-Platform"
+
 void error(char *msg)
 {
     perror(msg);
     exit(0);
 }
 
-int main(int argc, char *argv[])
+int main(int argc,char *argv[])
 {
     int sockfd, portno, n;
 
@@ -19,15 +21,16 @@ int main(int argc, char *argv[])
     struct hostent *server;
 
     char buffer[256];
-    if (argc < 3) {
-       fprintf(stderr,"usage %s hostname port\n", argv[0]);
+    if (argc < 2) {
+      fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
     }
-    portno = atoi(argv[2]);
+    portno = atoi(argv[1]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);//creat a new socket
     if (sockfd < 0) 
         error("ERROR opening socket");
-    server = gethostbyname(argv[1]);
+    printf("Client socket is created\n");
+    server = gethostbyname(Server_Hostname);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);
@@ -39,8 +42,9 @@ int main(int argc, char *argv[])
          server->h_length);
     serv_addr.sin_port = htons(portno);
 	//connect system call
-      if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
-        error("ERROR connecting");
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
+      error("ERROR connecting");
+    printf("Connected to the Server at %s:%d\n",Server_Hostname,portno);
     while (1)
     {
       printf("Please enter the message(type 'exit' to quit): ");
