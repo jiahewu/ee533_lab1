@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <string.h>
 
 void error(char *msg)
 {
@@ -38,18 +39,28 @@ int main(int argc, char *argv[])
          server->h_length);
     serv_addr.sin_port = htons(portno);
 	//connect system call
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
+      if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
         error("ERROR connecting");
-    printf("Please enter the message: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd,buffer,strlen(buffer));
-    if (n < 0) 
+    while (1)
+    {
+      printf("Please enter the message(type 'exit' to quit): ");
+      bzero(buffer,256);
+      fgets(buffer,255,stdin);
+      buffer[strcspn(buffer,"\n")]='\0';//remove newline character made by fgets()
+      //quit if enter 'exit'
+      if(strcmp(buffer,"exit")==0)
+      {
+        printf("Exiting the client program.\n");
+        break;
+      }
+      n = write(sockfd,buffer,strlen(buffer));
+      if (n < 0) 
          error("ERROR writing to socket");
-    bzero(buffer,256);
-    n = read(sockfd,buffer,255);
-    if (n < 0) 
+      bzero(buffer,256);
+      n = read(sockfd,buffer,255);
+      if (n < 0) 
          error("ERROR reading from socket");
-    printf("%s\n",buffer);
+      printf("%s\n",buffer);
+    } 
     return 0;
 }
